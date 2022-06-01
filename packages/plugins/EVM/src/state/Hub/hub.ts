@@ -178,7 +178,7 @@ class Hub implements EVM_Hub {
                 size: this.sizePerPage,
             })
 
-            yield yield* pageable.data
+            yield* pageable.data
 
             if (pageable.data.length === 0) return
         }
