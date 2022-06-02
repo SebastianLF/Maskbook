@@ -173,11 +173,13 @@ class Hub implements EVM_Hub {
 
     async *getAllNonFungibleAssets(
         address: string,
+        options?: HubOptions<ChainId>,
     ): AsyncIterableIterator<NonFungibleAsset<ChainId, SchemaType> | Error> {
         let currentPage = 0
         while (currentPage < this.maxPageSize) {
             const pageable = await this.getNonFungibleAssets(address, {
                 indicator: currentPage,
+                chainId: options?.chainId ?? this.chainId,
                 size: this.sizePerPage,
             })
             // @ts-ignore
