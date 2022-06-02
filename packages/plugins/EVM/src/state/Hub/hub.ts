@@ -171,16 +171,23 @@ class Hub implements EVM_Hub {
         }
     }
 
-    async *getAllNonFungibleAssets(address: string): AsyncIterableIterator<NonFungibleAsset<ChainId, SchemaType>> {
-        for (let i = 0; i < this.maxPageSize; i += 1) {
+    async *getAllNonFungibleAssets(
+        address: string,
+    ): AsyncIterableIterator<NonFungibleAsset<ChainId, SchemaType> | Error> {
+        let currentPage = 0
+        while (currentPage < this.maxPageSize) {
             const pageable = await this.getNonFungibleAssets(address, {
-                indicator: i,
+                indicator: currentPage,
                 size: this.sizePerPage,
             })
-
-            yield* pageable.data
-
-            if (pageable.data.length === 0) return
+            // @ts-ignore
+            if (pageable.error) {
+                yield new Error('Fetch failed')
+            } else {
+                yield* pageable.data
+                currentPage = currentPage + 1
+                if (pageable.data.length === 0) break
+            }
         }
     }
 
