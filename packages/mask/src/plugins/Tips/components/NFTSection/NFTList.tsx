@@ -1,6 +1,6 @@
 import { useChainId, useWeb3State } from '@masknet/plugin-infra/web3'
-import { NFTCardStyledAssetPlayer } from '@masknet/shared'
-import { makeStyles, ShadowRootTooltip } from '@masknet/theme'
+import { ElementAnchor, NFTCardStyledAssetPlayer } from '@masknet/shared'
+import { LoadingBase, makeStyles, ShadowRootTooltip } from '@masknet/theme'
 import { isSameAddress, NetworkPluginID, NonFungibleToken } from '@masknet/web3-shared-base'
 import type { ChainId, SchemaType } from '@masknet/web3-shared-evm'
 import { Checkbox, Link, List, ListItem, Radio } from '@mui/material'
@@ -15,6 +15,8 @@ interface Props {
     onChange?: (id: string | null, contractAddress: string) => void
     limit?: number
     className: string
+    nextPage(): void
+    loadFinish: boolean
 }
 
 const useStyles = makeStyles()((theme) => ({
@@ -37,9 +39,9 @@ const useStyles = makeStyles()((theme) => ({
         padding: 0,
         flexDirection: 'column',
         borderRadius: 12,
-        height: 100,
+        height: 96,
         userSelect: 'none',
-        width: 100,
+        width: 96,
         justifyContent: 'center',
     },
     disabled: {
@@ -111,7 +113,7 @@ const includes = (pairs: TipNFTKeyPair[], pair: TipNFTKeyPair): boolean => {
     return !!pairs.find(([address, tokenId]) => isSameAddress(address, pair[0]) && tokenId === pair[1])
 }
 
-export const NFTList: FC<Props> = ({ selectedPairs, tokens, onChange, limit = 1, className }) => {
+export const NFTList: FC<Props> = ({ selectedPairs, tokens, onChange, limit = 1, className, nextPage, loadFinish }) => {
     const { classes } = useStyles()
 
     const isRadio = limit === 1
@@ -142,12 +144,12 @@ export const NFTList: FC<Props> = ({ selectedPairs, tokens, onChange, limit = 1,
                 return (
                     <ShadowRootTooltip
                         classes={{ tooltip: classes.tooltip }}
-                        key={token.tokenId}
+                        key={token.tokenId + token.id}
                         title={`${token.contract?.name} ${Others?.formatTokenId(token.tokenId, 2)}`}
                         placement="top"
                         arrow>
                         <ListItem
-                            key={token.tokenId}
+                            key={token.tokenId + token.id}
                             className={classnames(classes.nftItem, {
                                 [classes.disabled]: disabled,
                                 [classes.selected]: selected,
@@ -175,6 +177,12 @@ export const NFTList: FC<Props> = ({ selectedPairs, tokens, onChange, limit = 1,
                     </ShadowRootTooltip>
                 )
             })}
+            <ElementAnchor
+                callback={() => {
+                    if (nextPage) nextPage()
+                }}>
+                {!loadFinish && <LoadingBase />}
+            </ElementAnchor>
         </List>
     )
 }
