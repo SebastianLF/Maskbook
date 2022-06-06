@@ -12,6 +12,7 @@ import { useTip } from '../../contexts'
 import { useI18N } from '../../locales'
 import type { TipNFTKeyPair } from '../../types'
 import { NFTList } from './NFTList'
+import { RetryHint } from './RetryHint'
 
 export * from './NFTList'
 
@@ -26,6 +27,7 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'auto',
+        minHeight: '100%',
     },
     statusBox: {
         display: 'flex',
@@ -71,14 +73,12 @@ export const NFTSection: FC<Props> = ({ className, onAddToken, onEmpty, ...rest 
         setGuessLoading(false)
     }, 10000)
 
-    // const { value: fetchedTokens = EMPTY_LIST, loading } = useNonFungibleAssets(NetworkPluginID.PLUGIN_EVM)
     // TODO: add address and chainId && retry
     const {
         value: fetchedTokens = EMPTY_LIST,
         done,
         next,
-        error,
-        retry: retryFetchCollectible,
+        error: loadError,
     } = useNonFungibleAssets2(NetworkPluginID.PLUGIN_EVM, SchemaType.ERC721)
 
     const tokens = useMemo(() => {
@@ -111,6 +111,9 @@ export const NFTSection: FC<Props> = ({ className, onAddToken, onEmpty, ...rest 
                                 loadFinish={done}
                             />
                         )
+                    }
+                    if (tokens.length === 0 && loadError) {
+                        return <RetryHint retry={next} />
                     }
                     if (tokens.length === 0 && (!done || guessLoading)) {
                         return (
