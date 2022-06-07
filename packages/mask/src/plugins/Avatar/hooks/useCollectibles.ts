@@ -7,7 +7,7 @@ export function useCollectibles() {
         value: assets = [],
         error,
         retry,
-        loading,
+        done: loading,
     } = useNonFungibleAssets(NetworkPluginID.PLUGIN_EVM, SchemaType.ERC721)
 
     const collectibles = assets.map((x) => {
